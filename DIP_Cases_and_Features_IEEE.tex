@@ -1,0 +1,193 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage[letterpaper,top=0.75in,bottom=1in,left=0.625in,right=0.625in,columnsep=0.25in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{cite}
+\usepackage{caption}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+% ---- IEEE-style headings ----
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+\titleformat{\section}{\centering\normalsize\scshape}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titleformat{\subsection}{\normalsize\itshape}{\thesubsection.}{0.5em}{}
+\titlespacing*{\subsection}{0pt}{6pt}{3pt}
+\captionsetup[table]{labelsep=newline,font={small,sc},justification=centering,name=TABLE}
+\renewcommand{\thetable}{\Roman{table}}
+\setlist{nosep,leftmargin=*}
+\pagestyle{plain}
+
+\begin{document}
+
+\twocolumn[
+\begin{center}
+{\fontsize{22}{26}\selectfont Digital Image Processing for Real-World Cases:\\ A Summary of Applications and Suitable Features\par}
+\vspace{10pt}
+{\large Muhammad Alaric Athaya Iskandar\par}
+\vspace{2pt}
+{\small\itshape Department of Computer Science and Electronics, Universitas Gadjah Mada, Yogyakarta, Indonesia\par}
+{\small NIM: 25/555070/PA/23257 \quad Email: muhammadalariciskandar@gmail.com\par}
+\vspace{14pt}
+\end{center}
+]
+
+\noindent\textbf{\textit{Abstract}---Digital image processing (DIP) helps solve many practical problems, from finding tumors in medical scans to reading license plates. This paper summarizes six common cases that can be solved with DIP techniques: medical image analysis, face recognition, fruit quality grading, license plate recognition, low-light surveillance enhancement, and industrial surface defect detection. For each case, we describe the problem, the usual processing steps, and the features that fit the task best. We group the features into color, texture, shape, edge, and intensity features, and show that the right choice depends on what makes the objects in each case different from each other.}
+
+\vspace{4pt}
+\noindent\textbf{\textit{Index Terms}---digital image processing, feature extraction, texture, color features, shape descriptors, image enhancement.}
+
+\section{Introduction}
+Digital image processing is the use of computer algorithms to improve images or to pull useful information out of them \cite{gonzalez}. A typical DIP system follows the same basic pipeline: image acquisition, pre-processing (noise removal, contrast enhancement), segmentation (separating the object from the background), feature extraction, and finally classification or decision making.
+
+Of these steps, feature extraction is often the most important. A \emph{feature} is a number or set of numbers that describes something meaningful about an image region, such as its color, texture, or shape. Good features make objects of different classes easy to tell apart, while bad features make even a strong classifier fail. Because of this, the main question for any DIP case is: \emph{what makes the target objects different, and which feature captures that difference?}
+
+This report summarizes six cases where DIP is used in practice and identifies the features that suit each one. Section~II gives a short overview of feature types. Section~III covers the cases. Section~IV compares them, and Section~V concludes.
+
+\section{Overview of Image Features}
+Image features can be grouped into five main types:
+
+\begin{itemize}
+\item \textbf{Color features:} mean and standard deviation of each channel, color histograms, and color moments. Spaces like HSV or L*a*b* are often used because they separate color from brightness.
+\item \textbf{Texture features:} describe patterns of pixel intensity. Common ones are the Gray-Level Co-occurrence Matrix (GLCM) \cite{haralick}, Local Binary Patterns (LBP) \cite{ojala}, and Gabor filter responses.
+\item \textbf{Shape features:} area, perimeter, circularity, aspect ratio, and invariant moments such as Hu moments \cite{hu}.
+\item \textbf{Edge and gradient features:} edge maps from the Canny detector \cite{canny} and Histograms of Oriented Gradients (HOG) \cite{dalal}.
+\item \textbf{Intensity/statistical features:} histogram mean, variance, entropy, and frequency-domain features from the Fourier transform.
+\end{itemize}
+
+Two texture features appear often in this report. GLCM contrast measures how much nearby pixels differ:
+\begin{equation}
+\text{Contrast} = \sum_{i,j} (i-j)^2 \, P(i,j),
+\end{equation}
+where $P(i,j)$ is the normalized chance that a pixel with gray level $i$ sits next to a pixel with gray level $j$. LBP labels each pixel by comparing it to its $P$ neighbors on a circle of radius $R$:
+\begin{equation}
+\text{LBP}_{P,R} = \sum_{p=0}^{P-1} s(g_p - g_c)\,2^p, \quad s(x)=\begin{cases}1, & x\ge 0\\ 0, & x<0\end{cases}
+\end{equation}
+where $g_c$ is the center pixel and $g_p$ are the neighbors. A histogram of LBP codes over a region becomes the texture feature.
+
+\section{Cases Solved by Image Processing}
+
+\subsection{Medical Image Analysis (Tumor Detection)}
+\textbf{Problem:} Doctors need to find abnormal regions, such as tumors in brain MRI or nodules in chest X-rays. Manual reading is slow and depends on the doctor's experience.
+
+\textbf{Techniques:} Noise is reduced with median or Gaussian filters, and contrast is improved with histogram equalization. The suspicious region is then segmented with thresholding (e.g., Otsu's method \cite{otsu}), region growing, or watershed segmentation.
+
+\textbf{Suitable features:} Tumors often look different in brightness and texture from healthy tissue, and they tend to have irregular borders. So the best features are:
+\begin{itemize}
+\item \emph{Intensity statistics}: mean, variance, skewness, entropy of the region.
+\item \emph{GLCM texture}: contrast, correlation, energy, homogeneity.
+\item \emph{Shape}: area, perimeter, circularity, and border irregularity. Malignant tumors usually have lower circularity.
+\end{itemize}
+
+\subsection{Face Recognition}
+\textbf{Problem:} Identify or verify a person from a face image, used in phone unlocking, attendance systems, and access control.
+
+\textbf{Techniques:} First the face is detected and cropped, then aligned using eye positions, converted to grayscale, and resized to a fixed size. Lighting is normalized with histogram equalization.
+
+\textbf{Suitable features:} Faces share the same overall shape, so the differences are in fine local patterns. Good features are:
+\begin{itemize}
+\item \emph{LBP histograms}: the face is split into a grid, and an LBP histogram is taken from each cell. LBP is robust to lighting changes \cite{ojala}.
+\item \emph{HOG}: captures the shape of eyes, nose, and mouth through gradient directions \cite{dalal}.
+\item \emph{Geometric features}: distances and angles between facial landmarks (eyes, nose tip, mouth corners).
+\end{itemize}
+
+\subsection{Fruit Quality and Ripeness Grading}
+\textbf{Problem:} Sorting fruits (e.g., tomatoes, bananas, mangoes) by ripeness and finding damaged ones. Manual sorting is slow and not consistent.
+
+\textbf{Techniques:} The fruit is separated from the background using color thresholding in HSV space, followed by morphological opening and closing to clean the mask.
+
+\textbf{Suitable features:} Ripeness mainly changes the color, while defects show up as spots and texture changes:
+\begin{itemize}
+\item \emph{Color}: mean and standard deviation of Hue, Saturation, and Value; or the a* and b* channels in L*a*b* space. For example, tomatoes shift from green to red as they ripen.
+\item \emph{Texture}: GLCM features to detect bruises, rot, or rough skin.
+\item \emph{Shape and size}: area, major/minor axis length, and roundness for size grading.
+\end{itemize}
+
+\subsection{License Plate Recognition}
+\textbf{Problem:} Automatically read vehicle license plates for parking, toll gates, and traffic law enforcement.
+
+\textbf{Techniques:} The process has three stages: (1) locate the plate, (2) segment each character, and (3) recognize each character. Edge detection and morphological operations help find the plate. Binarization and connected component labeling split the characters.
+
+\textbf{Suitable features:}
+\begin{itemize}
+\item \emph{For plate location}: edge density (plates have many vertical edges), the rectangle's aspect ratio (Indonesian plates are wide and short), and color contrast between text and plate background.
+\item \emph{For character segmentation}: connected component size, height, and vertical/horizontal projection profiles.
+\item \emph{For character recognition}: HOG, zoning features (pixel density in a grid of cells), or Hu moments, which do not change with scaling and small rotations \cite{hu}.
+\end{itemize}
+
+\subsection{Low-Light Surveillance (CCTV) Enhancement}
+\textbf{Problem:} CCTV footage taken at night is dark, noisy, and has low contrast, so faces, plates, and events are hard to see.
+
+\textbf{Techniques:} Pixel-based enhancement methods such as gamma correction, histogram equalization, and Contrast Limited Adaptive Histogram Equalization (CLAHE) \cite{zuiderveld} brighten the image. Denoising filters (median, bilateral) reduce the noise that increases after brightening.
+
+\textbf{Suitable features:} Here, features are used to \emph{measure} the image and to \emph{choose} the right enhancement settings, rather than to classify objects:
+\begin{itemize}
+\item \emph{Histogram statistics}: mean brightness (to decide the gamma value), standard deviation (contrast), and entropy (amount of detail).
+\item \emph{Noise estimate}: variance in flat regions, to decide how strong the denoising should be.
+\item \emph{Quality metrics}: PSNR and SSIM when a reference image exists, or no-reference metrics otherwise, to compare results.
+\end{itemize}
+
+\subsection{Industrial Surface Defect Detection}
+\textbf{Problem:} Find scratches, cracks, holes, or stains on products such as steel sheets, fabric, tiles, and printed circuit boards. Human inspectors get tired and miss small defects.
+
+\textbf{Techniques:} The image is filtered to remove noise, then compared with a defect-free reference image or analyzed for unusual patterns. Defects are segmented with adaptive thresholding or edge detection.
+
+\textbf{Suitable features:} Normal surfaces have a regular, repeated texture. Defects break this pattern, so texture and frequency features work best:
+\begin{itemize}
+\item \emph{Texture}: GLCM, LBP, and Gabor filter responses.
+\item \emph{Frequency}: Fourier transform energy; a defect adds energy that does not belong to the normal repeated pattern.
+\item \emph{Edge and shape}: Canny edge density, and the length and orientation of the defect (to tell a scratch from a hole).
+\end{itemize}
+
+\section{Comparison and Discussion}
+Table~\ref{tab:summary} summarizes the six cases. Three patterns can be seen:
+
+\begin{enumerate}
+\item \textbf{Texture features are the most widely used.} GLCM and LBP appear in four of the six cases, because many real objects (tissue, skin, fruit surface, steel) differ mostly in their surface pattern.
+\item \textbf{Color matters only when color carries meaning.} Fruit grading depends on color, but medical scans and most defect images are grayscale, so color features add nothing there.
+\item \textbf{Shape features are good for objects with clear boundaries.} Plates, characters, tumors, and fruit have clear outlines, so area, aspect ratio, and moments work well. For textures with no fixed shape, they are less useful.
+\end{enumerate}
+
+In general, combining two or three types of features gives better results than one type alone. Deep learning methods such as convolutional neural networks can learn features automatically, but they need much more labeled data and computing power. Hand-crafted features are still useful when data is small, when results must be explained, or when the system must run on simple hardware.
+
+\begin{table}[t]
+\centering
+\caption{Summary of Cases and Suitable Features}
+\label{tab:summary}
+\small
+\renewcommand{\arraystretch}{1.2}\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright}p{0.22\columnwidth} >{\raggedright}p{0.29\columnwidth} >{\raggedright\arraybackslash}p{0.33\columnwidth}}
+\toprule
+\textbf{Case} & \textbf{Main Techniques} & \textbf{Suitable Features} \\
+\midrule
+Medical tumor detection & Filtering, Otsu, region growing & Intensity stats, GLCM, circularity \\
+Face recognition & Alignment, histogram equalization & LBP, HOG, landmark distances \\
+Fruit grading & HSV thresholding, morphology & HSV/L*a*b* color, GLCM, size \\
+License plate recognition & Edge detection, connected components & Edge density, aspect ratio, HOG, Hu moments \\
+Low-light CCTV & Gamma, CLAHE, denoising & Histogram mean/std, entropy, noise level \\
+Surface defect detection & Adaptive threshold, FFT & GLCM, LBP, Gabor, Fourier energy \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Conclusion}
+This report summarized six cases that can be solved with digital image processing and identified the features that suit each one. The choice of feature should follow what makes the target different: color for ripeness, texture for tissue and surface defects, shape for plates and characters, local patterns for faces, and histogram statistics for image enhancement. Choosing features based on this idea, and combining a few feature types, leads to simpler and more accurate image processing systems.
+
+\begin{thebibliography}{9}
+\footnotesize
+\bibitem{gonzalez} R.~C. Gonzalez and R.~E. Woods, \emph{Digital Image Processing}, 4th~ed. New York, NY, USA: Pearson, 2018.
+\bibitem{haralick} R.~M. Haralick, K.~Shanmugam, and I.~Dinstein, ``Textural features for image classification,'' \emph{IEEE Trans. Syst., Man, Cybern.}, vol.~SMC-3, no.~6, pp.~610--621, Nov. 1973.
+\bibitem{ojala} T.~Ojala, M.~Pietik\"ainen, and T.~M\"aenp\"a\"a, ``Multiresolution gray-scale and rotation invariant texture classification with local binary patterns,'' \emph{IEEE Trans. Pattern Anal. Mach. Intell.}, vol.~24, no.~7, pp.~971--987, Jul. 2002.
+\bibitem{hu} M.-K. Hu, ``Visual pattern recognition by moment invariants,'' \emph{IRE Trans. Inf. Theory}, vol.~8, no.~2, pp.~179--187, Feb. 1962.
+\bibitem{canny} J.~Canny, ``A computational approach to edge detection,'' \emph{IEEE Trans. Pattern Anal. Mach. Intell.}, vol.~PAMI-8, no.~6, pp.~679--698, Nov. 1986.
+\bibitem{dalal} N.~Dalal and B.~Triggs, ``Histograms of oriented gradients for human detection,'' in \emph{Proc. IEEE CVPR}, San Diego, CA, USA, 2005, pp.~886--893.
+\bibitem{otsu} N.~Otsu, ``A threshold selection method from gray-level histograms,'' \emph{IEEE Trans. Syst., Man, Cybern.}, vol.~9, no.~1, pp.~62--66, Jan. 1979.
+\bibitem{zuiderveld} K.~Zuiderveld, ``Contrast limited adaptive histogram equalization,'' in \emph{Graphics Gems IV}, P.~S. Heckbert, Ed. San Diego, CA, USA: Academic Press, 1994, pp.~474--485.
+\end{thebibliography}
+
+\end{document}
