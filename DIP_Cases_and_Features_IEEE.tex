@@ -5,6 +5,9 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage[hidelinks]{hyperref}
+\usepackage[hidelinks]{hyperref}
+\raggedbottom
+
 
 \begin{document}
 
@@ -20,7 +23,7 @@ muhammadalaricathayaiskandar@mail.ugm.ac.id}}
 \maketitle
 
 \begin{abstract}
-Many image processing examples in textbooks come from Western settings, such as face databases or car plates in standard formats. This paper looks at six problems that matter in Indonesia and that can be solved with digital image processing: rice leaf disease detection, oil palm fruit ripeness grading, batik motif classification, handwritten Javanese script recognition, road damage detection, and low-light CCTV enhancement. The cases are grouped into three themes: agriculture, cultural heritage, and public infrastructure. For each case we explain the problem, the processing steps used in published work, and which features suit the task, along with the reported results. We find that the best feature depends on one question: \emph{what visual property actually changes between the classes?} Color fits ripeness, texture fits batik and road surfaces, and shape or pixel layout fits handwritten characters.
+The examples in many image processing literature often use Western environment like faces in their databases and car plates with standard format. This paper reviews six image processing problems which are relevant to Indonesia and which can be addressed using digital image processing techniques, namely disease detection in rice leaves, oil palm fruit ripeness classification, batik motif recognition, Javanese handwritten character recognition, road damage detection, and CCTV under low-light conditions improvement. The six cases will be categorized in three groups: agricultural, heritage, and public infrastructures. For each case, the problem, the image processing technique applied in previous researches, the relevant feature used, and its performance will be discussed. It is discovered that the best feature depends on one single issue: \emph{What kind of visual property changes among different classes?}
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -28,11 +31,11 @@ digital image processing, feature extraction, GLCM, color features, zoning, bati
 \end{IEEEkeywords}
 
 \section{Introduction}
-Indonesia has many problems where a camera and a computer can save time and money. Farmers lose harvests to plant disease, palm oil mills need to sort fruit bunches every day, cultural objects like batik and Javanese script need to be recorded digitally, and roads and public places need to be watched for damage and safety. Most of these jobs are still done by hand, which is slow and depends on the skill of the person doing it.
+    There are many problems in Indonesia that can be solved faster and more cheaply using camera and computer. Indonesia's farmers' harvest can be wasted due to diseases in the plants, palm oil mills require sorting of the fruit bunches daily, batik and Javanese script should be digitally preserved, and roads and other areas require monitoring for any signs of damage and other problems. Most of these tasks are carried out manually and are therefore very time-consuming.
 
-Digital image processing (DIP) can automate them. A typical system follows five steps: capture the image, clean it (pre-processing), separate the object from the background (segmentation), describe the object with numbers (feature extraction), and make a decision (classification) \cite{gonzalez}. This paper focuses on the fourth step, because the choice of features usually decides whether the system works. A classifier can only separate classes if the features show a real difference between them.
+    Automating them could be easily achieved with digital image processing (DIP). A typical DIP algorithm consists of the following five stages: image acquisition, image cleaning (pre-processing), segmentation, feature extraction and classification \cite{gonzalez}. This paper will examine the fourth step in more detail. The selection of features is usually the key factor in success or failure of the whole process; a good classifier can only distinguish the classes when the features are indeed different enough.
 
-Section~II briefly lists the feature types used in this paper. Section~III presents six cases in three themes. Section~IV compares the cases, and Section~V concludes.
+    In section~II a brief overview of the types of features used in this paper is provided. Six case studies are provided in Section~III, organized into three themes. Section~IV provides comparison of the cases and Section~V is the conclusion.
 
 \section{Feature Types Used in This Paper}
 \subsection{Color Features}
@@ -51,7 +54,7 @@ High contrast means sharp changes between neighbors, high energy means a uniform
 Shape features describe the outline of a region (area, perimeter, circularity). \emph{Zoning} is a layout feature: a binary character image is divided into an $n \times n$ grid, and the share of black pixels in each cell becomes one feature. A $8\times 8$ grid gives a 64-number vector that describes where the strokes are.
 
 \subsection{Histogram Statistics}
-The mean, standard deviation, and entropy of the gray-level histogram describe how bright an image is, how much contrast it has, and how much detail it holds. These are useful for measuring image quality rather than for recognizing objects.
+The mean, standard deviation, and entropy of the gray-level histogram characterize the brightness, contrast, and texture of the image. These features can be used to measure the quality of images rather than to recognize objects.
 
 \section{Cases}
 
@@ -62,14 +65,14 @@ The mean, standard deviation, and entropy of the gray-level histogram describe h
 
 \textbf{Processing.} Azim \emph{et al.} \cite{azim} first removed the background using a threshold on the saturation channel, then isolated the sick area using a threshold on the hue channel. Features were taken only from the sick area, not the whole leaf.
 
-\textbf{Suitable features.} Each disease leaves spots with a different \emph{color} (brown, yellow, dark), a different \emph{shape} (long streaks vs.\ round spots), and a different surface \emph{texture}. Combining all three gave 86.58\% accuracy with an extreme gradient boosting classifier on the UCI rice leaf dataset \cite{azim}. The key idea is that cutting out the sick area first makes the features much cleaner.
+\textbf{Suitable features.} Each disease leaves spots with a different \emph{color} (brown, yellow, dark), a different \emph{shape} (long streaks vs.\ round spots), and a different surface \emph{texture}. Combining all three gave 86.58\% precision with an extreme gradient booster classifier on the UCI rice leaf dataset \cite{azim}. The key idea is that cutting out the sick area first makes the features much cleaner.
 
 \subsection{Oil Palm Fruit Ripeness Grading}
 \textbf{Problem.} Indonesia is the world's biggest palm oil producer. Fresh fruit bunches must be harvested at the right ripeness, because unripe bunches give less oil and overripe bunches raise free fatty acid levels. Graders currently judge ripeness by eye.
 
 \textbf{Processing.} Images of the bunches are captured under controlled lighting, and the fruit region is segmented from the background.
 
-\textbf{Suitable features.} Ripeness shows mainly as a color change, from black or dark purple to reddish orange. So \emph{color features} are the natural choice. Fadilah \emph{et al.} \cite{fadilah} fed color features into an artificial neural network, and found that reducing the features with Principal Component Analysis (PCA) improved accuracy further. Texture and shape add little here, since bunches of all ripeness levels look alike in shape.
+\textbf{Suitable features.} Ripeness is mainly characterized by a change in the color from black or dark purple to reddish orange. Thus, \emph{color features} would be the best choice. Fadilah \emph{et al.} \cite{fadilah} fed the color features to an artificial neural network, and found that the reduction of features using PCA increased the accuracy even more. Texture and shape provide little additional information since all bunches, regardless of the ripeness level, are similarly shaped.
 
 \subsection*{Theme 2: Cultural Heritage}
 
@@ -78,7 +81,7 @@ The mean, standard deviation, and entropy of the gray-level histogram describe h
 
 \textbf{Processing.} Images are converted to grayscale and reduced to fewer gray levels (for example 16) so the GLCM stays small.
 
-\textbf{Suitable features.} Batik motifs are defined by their repeating \emph{pattern}, not by color, since the same motif can be made in any color. This makes \emph{texture} the right feature. Minarno \emph{et al.} \cite{minarno} computed energy, entropy, contrast, and correlation from GLCM at four angles, giving 16 features. With cross-validation, a Support Vector Machine reached 92.3\% average accuracy, compared to 78.3\% for k-nearest neighbor. Using four angles matters because motifs have different main directions: Parang is built from diagonal lines, while Kawung is built from round shapes, so a single angle would miss part of the pattern.
+\textbf{Suitable features.} Motifs in Batik have repeating \emph{patterns} rather than colors because the same motif can exist in different colors. This gives the correct attribute to be used as \emph{texture}. The authors of \cite{minarno} calculated energy, entropy, contrast and correlation attributes using GLCM at four different angles, resulting in 16 features. Using cross validation, the Support Vector Machine method produced an accuracy of 92.3\% whereas k nearest neighbor produced only 78.3\%. Using four different angles is important because different motifs have different dominant directions; for example, Parang motif consists of diagonal lines while Kawung motif consists of circles.
 
 \subsection{Handwritten Javanese Script Recognition}
 \textbf{Problem.} Aksara Jawa is a traditional script still taught in schools in Central and East Java. Recognizing handwritten characters can help digitize old manuscripts and support learning apps.
@@ -138,7 +141,7 @@ Low-light CCTV \cite{guo} & Histogram stats & Mean, std, entropy; PSNR/SSIM & Qu
 \end{table}
 
 \section{Conclusion}
-This paper summarized six Indonesian problems that can be solved with digital image processing, across agriculture, cultural heritage, and public infrastructure. For each one, the most suitable feature was the one that follows the real visual difference between classes: color for oil palm ripeness, texture for batik and road damage, a mix of color, shape, and texture for rice disease, stroke layout for Javanese script, and histogram statistics for low-light enhancement. Asking ``what actually changes?'' before choosing features is a simple rule that leads to simpler and more accurate systems.
+    In the present paper, six problems arising in Indonesia have been discussed that could be addressed using digital image processing technology. For all of them, the most appropriate feature turned out to be the one that connects to the difference between classes in nature: color – in case of oil palm maturity assessment; texture, when analyzing batik patterns and road surface damages; color, shape, and texture when recognizing diseases on rice plants; layout of strokes, in recognition of Javanese script characters; histogram statistics, in improving images in low light conditions.
 
 \begin{thebibliography}{00}
 \bibitem{gonzalez} R.~C. Gonzalez and R.~E. Woods, \emph{Digital Image Processing}, 4th~ed. New York, NY, USA: Pearson, 2018.
