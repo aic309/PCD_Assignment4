@@ -1,193 +1,155 @@
-\documentclass[10pt,twocolumn,letterpaper]{article}
-\usepackage[T1]{fontenc}
-\usepackage{mathptmx}
-\usepackage[letterpaper,top=0.75in,bottom=1in,left=0.625in,right=0.625in,columnsep=0.25in]{geometry}
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{array}
-\usepackage{cite}
-\usepackage{caption}
-\usepackage{titlesec}
-\usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
-
-% ---- IEEE-style headings ----
-\renewcommand{\thesection}{\Roman{section}}
-\renewcommand{\thesubsection}{\Alph{subsection}}
-\titleformat{\section}{\centering\normalsize\scshape}{\thesection.}{0.5em}{}
-\titlespacing*{\section}{0pt}{8pt}{4pt}
-\titleformat{\subsection}{\normalsize\itshape}{\thesubsection.}{0.5em}{}
-\titlespacing*{\subsection}{0pt}{6pt}{3pt}
-\captionsetup[table]{labelsep=newline,font={small,sc},justification=centering,name=TABLE}
-\renewcommand{\thetable}{\Roman{table}}
-\setlist{nosep,leftmargin=*}
-\pagestyle{plain}
 
 \begin{document}
 
-\twocolumn[
-\begin{center}
-{\fontsize{22}{26}\selectfont Digital Image Processing for Real-World Cases:\\ A Summary of Applications and Suitable Features\par}
-\vspace{10pt}
-{\large Muhammad Alaric Athaya Iskandar\par}
-\vspace{2pt}
-{\small\itshape Department of Computer Science and Electronics, Universitas Gadjah Mada, Yogyakarta, Indonesia\par}
-{\small NIM: 25/555070/PA/23257 \quad Email: muhammadalariciskandar@gmail.com\par}
-\vspace{14pt}
-\end{center}
-]
+\title{Choosing Image Features for Local Problems:\\ Six Digital Image Processing Cases from Indonesia}
 
-\noindent\textbf{\textit{Abstract}---Digital image processing (DIP) helps solve many practical problems, from finding tumors in medical scans to reading license plates. This paper summarizes six common cases that can be solved with DIP techniques: medical image analysis, face recognition, fruit quality grading, license plate recognition, low-light surveillance enhancement, and industrial surface defect detection. For each case, we describe the problem, the usual processing steps, and the features that fit the task best. We group the features into color, texture, shape, edge, and intensity features, and show that the right choice depends on what makes the objects in each case different from each other.}
+\author{\IEEEauthorblockN{Muhammad Alaric Athaya Iskandar}
+\IEEEauthorblockA{\textit{Department of Computer Science and Electronics} \\
+\textit{Universitas Gadjah Mada}\\
+Yogyakarta, Indonesia \\
+NIM: 25/555070/PA/23257 \\
+muhammadalariciskandar@gmail.com}}
 
-\vspace{4pt}
-\noindent\textbf{\textit{Index Terms}---digital image processing, feature extraction, texture, color features, shape descriptors, image enhancement.}
+\maketitle
+
+\begin{abstract}
+Many image processing examples in textbooks come from Western settings, such as face databases or car plates in standard formats. This paper looks at six problems that matter in Indonesia and that can be solved with digital image processing: rice leaf disease detection, oil palm fruit ripeness grading, batik motif classification, handwritten Javanese script recognition, road damage detection, and low-light CCTV enhancement. The cases are grouped into three themes: agriculture, cultural heritage, and public infrastructure. For each case we explain the problem, the processing steps used in published work, and which features suit the task, along with the reported results. We find that the best feature depends on one question: \emph{what visual property actually changes between the classes?} Color fits ripeness, texture fits batik and road surfaces, and shape or pixel layout fits handwritten characters.
+\end{abstract}
+
+\begin{IEEEkeywords}
+digital image processing, feature extraction, GLCM, color features, zoning, batik, agriculture, low-light enhancement
+\end{IEEEkeywords}
 
 \section{Introduction}
-Digital image processing is the use of computer algorithms to improve images or to pull useful information out of them \cite{gonzalez}. A typical DIP system follows the same basic pipeline: image acquisition, pre-processing (noise removal, contrast enhancement), segmentation (separating the object from the background), feature extraction, and finally classification or decision making.
+Indonesia has many problems where a camera and a computer can save time and money. Farmers lose harvests to plant disease, palm oil mills need to sort fruit bunches every day, cultural objects like batik and Javanese script need to be recorded digitally, and roads and public places need to be watched for damage and safety. Most of these jobs are still done by hand, which is slow and depends on the skill of the person doing it.
 
-Of these steps, feature extraction is often the most important. A \emph{feature} is a number or set of numbers that describes something meaningful about an image region, such as its color, texture, or shape. Good features make objects of different classes easy to tell apart, while bad features make even a strong classifier fail. Because of this, the main question for any DIP case is: \emph{what makes the target objects different, and which feature captures that difference?}
+Digital image processing (DIP) can automate them. A typical system follows five steps: capture the image, clean it (pre-processing), separate the object from the background (segmentation), describe the object with numbers (feature extraction), and make a decision (classification) \cite{gonzalez}. This paper focuses on the fourth step, because the choice of features usually decides whether the system works. A classifier can only separate classes if the features show a real difference between them.
 
-This report summarizes six cases where DIP is used in practice and identifies the features that suit each one. Section~II gives a short overview of feature types. Section~III covers the cases. Section~IV compares them, and Section~V concludes.
+Section~II briefly lists the feature types used in this paper. Section~III presents six cases in three themes. Section~IV compares the cases, and Section~V concludes.
 
-\section{Overview of Image Features}
-Image features can be grouped into five main types:
+\section{Feature Types Used in This Paper}
+\subsection{Color Features}
+Color features are taken from the pixel values of each channel, usually after converting RGB into a space that separates color from brightness, like HSV or L*a*b*. Common choices are the mean, standard deviation, and histogram of each channel. They work when classes differ mainly in color.
 
-\begin{itemize}
-\item \textbf{Color features:} mean and standard deviation of each channel, color histograms, and color moments. Spaces like HSV or L*a*b* are often used because they separate color from brightness.
-\item \textbf{Texture features:} describe patterns of pixel intensity. Common ones are the Gray-Level Co-occurrence Matrix (GLCM) \cite{haralick}, Local Binary Patterns (LBP) \cite{ojala}, and Gabor filter responses.
-\item \textbf{Shape features:} area, perimeter, circularity, aspect ratio, and invariant moments such as Hu moments \cite{hu}.
-\item \textbf{Edge and gradient features:} edge maps from the Canny detector \cite{canny} and Histograms of Oriented Gradients (HOG) \cite{dalal}.
-\item \textbf{Intensity/statistical features:} histogram mean, variance, entropy, and frequency-domain features from the Fourier transform.
-\end{itemize}
+\subsection{Texture Features (GLCM)}
+The Gray-Level Co-occurrence Matrix (GLCM) counts how often a pixel with gray level $i$ appears next to a pixel with gray level $j$ at a given distance and angle \cite{haralick}. From the normalized matrix $P(i,j)$, several numbers are computed:
+\begin{align}
+\text{Contrast} &= \textstyle\sum_{i,j}(i-j)^2P(i,j) \\
+\text{Energy} &= \textstyle\sum_{i,j}P(i,j)^2 \\
+\text{Entropy} &= -\textstyle\sum_{i,j}P(i,j)\log P(i,j)
+\end{align}
+High contrast means sharp changes between neighbors, high energy means a uniform or repeating pattern, and high entropy means a random, complex pattern. Computing GLCM at 0°, 45°, 90°, and 135° captures patterns in different directions.
 
-Two texture features appear often in this report. GLCM contrast measures how much nearby pixels differ:
-\begin{equation}
-\text{Contrast} = \sum_{i,j} (i-j)^2 \, P(i,j),
-\end{equation}
-where $P(i,j)$ is the normalized chance that a pixel with gray level $i$ sits next to a pixel with gray level $j$. LBP labels each pixel by comparing it to its $P$ neighbors on a circle of radius $R$:
-\begin{equation}
-\text{LBP}_{P,R} = \sum_{p=0}^{P-1} s(g_p - g_c)\,2^p, \quad s(x)=\begin{cases}1, & x\ge 0\\ 0, & x<0\end{cases}
-\end{equation}
-where $g_c$ is the center pixel and $g_p$ are the neighbors. A histogram of LBP codes over a region becomes the texture feature.
+\subsection{Shape and Layout Features}
+Shape features describe the outline of a region (area, perimeter, circularity). \emph{Zoning} is a layout feature: a binary character image is divided into an $n \times n$ grid, and the share of black pixels in each cell becomes one feature. A $8\times 8$ grid gives a 64-number vector that describes where the strokes are.
 
-\section{Cases Solved by Image Processing}
+\subsection{Histogram Statistics}
+The mean, standard deviation, and entropy of the gray-level histogram describe how bright an image is, how much contrast it has, and how much detail it holds. These are useful for measuring image quality rather than for recognizing objects.
 
-\subsection{Medical Image Analysis (Tumor Detection)}
-\textbf{Problem:} Doctors need to find abnormal regions, such as tumors in brain MRI or nodules in chest X-rays. Manual reading is slow and depends on the doctor's experience.
+\section{Cases}
 
-\textbf{Techniques:} Noise is reduced with median or Gaussian filters, and contrast is improved with histogram equalization. The suspicious region is then segmented with thresholding (e.g., Otsu's method \cite{otsu}), region growing, or watershed segmentation.
+\subsection*{Theme 1: Agriculture}
 
-\textbf{Suitable features:} Tumors often look different in brightness and texture from healthy tissue, and they tend to have irregular borders. So the best features are:
-\begin{itemize}
-\item \emph{Intensity statistics}: mean, variance, skewness, entropy of the region.
-\item \emph{GLCM texture}: contrast, correlation, energy, homogeneity.
-\item \emph{Shape}: area, perimeter, circularity, and border irregularity. Malignant tumors usually have lower circularity.
-\end{itemize}
+\subsection{Rice Leaf Disease Detection}
+\textbf{Problem.} Rice is Indonesia's main food crop, and diseases such as bacterial leaf blight, brown spot, and leaf smut can spread quickly. Farmers often cannot tell these diseases apart early.
 
-\subsection{Face Recognition}
-\textbf{Problem:} Identify or verify a person from a face image, used in phone unlocking, attendance systems, and access control.
+\textbf{Processing.} Azim \emph{et al.} \cite{azim} first removed the background using a threshold on the saturation channel, then isolated the sick area using a threshold on the hue channel. Features were taken only from the sick area, not the whole leaf.
 
-\textbf{Techniques:} First the face is detected and cropped, then aligned using eye positions, converted to grayscale, and resized to a fixed size. Lighting is normalized with histogram equalization.
+\textbf{Suitable features.} Each disease leaves spots with a different \emph{color} (brown, yellow, dark), a different \emph{shape} (long streaks vs.\ round spots), and a different surface \emph{texture}. Combining all three gave 86.58\% accuracy with an extreme gradient boosting classifier on the UCI rice leaf dataset \cite{azim}. The key idea is that cutting out the sick area first makes the features much cleaner.
 
-\textbf{Suitable features:} Faces share the same overall shape, so the differences are in fine local patterns. Good features are:
-\begin{itemize}
-\item \emph{LBP histograms}: the face is split into a grid, and an LBP histogram is taken from each cell. LBP is robust to lighting changes \cite{ojala}.
-\item \emph{HOG}: captures the shape of eyes, nose, and mouth through gradient directions \cite{dalal}.
-\item \emph{Geometric features}: distances and angles between facial landmarks (eyes, nose tip, mouth corners).
-\end{itemize}
+\subsection{Oil Palm Fruit Ripeness Grading}
+\textbf{Problem.} Indonesia is the world's biggest palm oil producer. Fresh fruit bunches must be harvested at the right ripeness, because unripe bunches give less oil and overripe bunches raise free fatty acid levels. Graders currently judge ripeness by eye.
 
-\subsection{Fruit Quality and Ripeness Grading}
-\textbf{Problem:} Sorting fruits (e.g., tomatoes, bananas, mangoes) by ripeness and finding damaged ones. Manual sorting is slow and not consistent.
+\textbf{Processing.} Images of the bunches are captured under controlled lighting, and the fruit region is segmented from the background.
 
-\textbf{Techniques:} The fruit is separated from the background using color thresholding in HSV space, followed by morphological opening and closing to clean the mask.
+\textbf{Suitable features.} Ripeness shows mainly as a color change, from black or dark purple to reddish orange. So \emph{color features} are the natural choice. Fadilah \emph{et al.} \cite{fadilah} fed color features into an artificial neural network, and found that reducing the features with Principal Component Analysis (PCA) improved accuracy further. Texture and shape add little here, since bunches of all ripeness levels look alike in shape.
 
-\textbf{Suitable features:} Ripeness mainly changes the color, while defects show up as spots and texture changes:
-\begin{itemize}
-\item \emph{Color}: mean and standard deviation of Hue, Saturation, and Value; or the a* and b* channels in L*a*b* space. For example, tomatoes shift from green to red as they ripen.
-\item \emph{Texture}: GLCM features to detect bruises, rot, or rough skin.
-\item \emph{Shape and size}: area, major/minor axis length, and roundness for size grading.
-\end{itemize}
+\subsection*{Theme 2: Cultural Heritage}
 
-\subsection{License Plate Recognition}
-\textbf{Problem:} Automatically read vehicle license plates for parking, toll gates, and traffic law enforcement.
+\subsection{Batik Motif Classification}
+\textbf{Problem.} Indonesia has thousands of batik motifs, such as Parang, Kawung, and Megamendung, each tied to a region and meaning. Classifying them automatically helps digital archiving and protects motifs from wrong labeling.
 
-\textbf{Techniques:} The process has three stages: (1) locate the plate, (2) segment each character, and (3) recognize each character. Edge detection and morphological operations help find the plate. Binarization and connected component labeling split the characters.
+\textbf{Processing.} Images are converted to grayscale and reduced to fewer gray levels (for example 16) so the GLCM stays small.
 
-\textbf{Suitable features:}
-\begin{itemize}
-\item \emph{For plate location}: edge density (plates have many vertical edges), the rectangle's aspect ratio (Indonesian plates are wide and short), and color contrast between text and plate background.
-\item \emph{For character segmentation}: connected component size, height, and vertical/horizontal projection profiles.
-\item \emph{For character recognition}: HOG, zoning features (pixel density in a grid of cells), or Hu moments, which do not change with scaling and small rotations \cite{hu}.
-\end{itemize}
+\textbf{Suitable features.} Batik motifs are defined by their repeating \emph{pattern}, not by color, since the same motif can be made in any color. This makes \emph{texture} the right feature. Minarno \emph{et al.} \cite{minarno} computed energy, entropy, contrast, and correlation from GLCM at four angles, giving 16 features. With cross-validation, a Support Vector Machine reached 92.3\% average accuracy, compared to 78.3\% for k-nearest neighbor. Using four angles matters because motifs have different main directions: Parang is built from diagonal lines, while Kawung is built from round shapes, so a single angle would miss part of the pattern.
 
-\subsection{Low-Light Surveillance (CCTV) Enhancement}
-\textbf{Problem:} CCTV footage taken at night is dark, noisy, and has low contrast, so faces, plates, and events are hard to see.
+\subsection{Handwritten Javanese Script Recognition}
+\textbf{Problem.} Aksara Jawa is a traditional script still taught in schools in Central and East Java. Recognizing handwritten characters can help digitize old manuscripts and support learning apps.
 
-\textbf{Techniques:} Pixel-based enhancement methods such as gamma correction, histogram equalization, and Contrast Limited Adaptive Histogram Equalization (CLAHE) \cite{zuiderveld} brighten the image. Denoising filters (median, bilateral) reduce the noise that increases after brightening.
+\textbf{Processing.} Each character is converted to a binary image, cropped to its bounding box, and resized to a fixed size so all characters can be compared.
 
-\textbf{Suitable features:} Here, features are used to \emph{measure} the image and to \emph{choose} the right enhancement settings, rather than to classify objects:
-\begin{itemize}
-\item \emph{Histogram statistics}: mean brightness (to decide the gamma value), standard deviation (contrast), and entropy (amount of detail).
-\item \emph{Noise estimate}: variance in flat regions, to decide how strong the denoising should be.
-\item \emph{Quality metrics}: PSNR and SSIM when a reference image exists, or no-reference metrics otherwise, to compare results.
-\end{itemize}
+\textbf{Suitable features.} Characters are black strokes on white paper, so color and texture carry almost no information. What matters is \emph{where the strokes are}. Handayani \emph{et al.} \cite{handayani} used \emph{zoning} features with 64 inputs into a backpropagation neural network and reached 77.00\% accuracy. The lower accuracy compared to the other cases shows how hard handwriting is: Javanese characters have many similar shapes, and each person writes differently.
 
-\subsection{Industrial Surface Defect Detection}
-\textbf{Problem:} Find scratches, cracks, holes, or stains on products such as steel sheets, fabric, tiles, and printed circuit boards. Human inspectors get tired and miss small defects.
+\subsection*{Theme 3: Public Infrastructure and Safety}
 
-\textbf{Techniques:} The image is filtered to remove noise, then compared with a defect-free reference image or analyzed for unusual patterns. Defects are segmented with adaptive thresholding or edge detection.
+\subsection{Road Damage Detection}
+\textbf{Problem.} Potholes and cracks are a real danger, especially for the many motorcycle riders on Indonesian roads. Road agencies need a cheap way to find and classify damage over long distances.
 
-\textbf{Suitable features:} Normal surfaces have a regular, repeated texture. Defects break this pattern, so texture and frequency features work best:
-\begin{itemize}
-\item \emph{Texture}: GLCM, LBP, and Gabor filter responses.
-\item \emph{Frequency}: Fourier transform energy; a defect adds energy that does not belong to the normal repeated pattern.
-\item \emph{Edge and shape}: Canny edge density, and the length and orientation of the defect (to tell a scratch from a hole).
-\end{itemize}
+\textbf{Processing.} A camera on a vehicle records the road, and each frame is converted to grayscale before feature extraction.
+
+\textbf{Suitable features.} A smooth road has an even, uniform texture, while damage breaks this pattern. Sartika \cite{sartika} used GLCM features (dissimilarity, correlation, contrast, energy, and angular second moment) with an SVM to sort road images into five damage types. The overall accuracy was 80\%, with F1 scores of 0.95 for potholes and 0.89 for cracks. Potholes are easiest to detect because they create a strong, dark break in the texture.
+
+\subsection{Low-Light CCTV Enhancement}
+\textbf{Problem.} Many CCTV cameras in Indonesian streets, campuses, and boarding houses (\emph{kos}) are low-cost models. At night their images are dark and noisy, so faces and plates cannot be seen. This case is also the topic of the author's ongoing group project on pixel-based enhancement.
+
+\textbf{Processing.} Pixel-based methods such as gamma correction, histogram equalization, and Contrast Limited Adaptive Histogram Equalization (CLAHE) \cite{zuiderveld} brighten dark areas. Guo \emph{et al.} \cite{guo} review these classic methods alongside newer learning-based ones. Classic methods are fast and need no training data, which suits cheap CCTV hardware.
+
+\textbf{Suitable features.} Unlike the other cases, the features here are not used to recognize an object. They are used to \emph{measure} the image and to \emph{tune} the method. The histogram mean decides how strong the gamma correction should be, the standard deviation shows the contrast, and entropy shows how much detail is visible. After enhancement, metrics like PSNR and SSIM compare the result to a reference image.
 
 \section{Comparison and Discussion}
-Table~\ref{tab:summary} summarizes the six cases. Three patterns can be seen:
+Table~\ref{tab:summary} summarizes the six cases. Several lessons stand out.
 
-\begin{enumerate}
-\item \textbf{Texture features are the most widely used.} GLCM and LBP appear in four of the six cases, because many real objects (tissue, skin, fruit surface, steel) differ mostly in their surface pattern.
-\item \textbf{Color matters only when color carries meaning.} Fruit grading depends on color, but medical scans and most defect images are grayscale, so color features add nothing there.
-\item \textbf{Shape features are good for objects with clear boundaries.} Plates, characters, tumors, and fruit have clear outlines, so area, aspect ratio, and moments work well. For textures with no fixed shape, they are less useful.
-\end{enumerate}
+\textbf{Pick the feature that matches the change between classes.} Ripeness changes color, so color wins. Batik motifs change pattern but not color, so texture wins. Characters change stroke position, so zoning wins. Using a feature that does not follow the real difference, like color for batik, only adds noise.
 
-In general, combining two or three types of features gives better results than one type alone. Deep learning methods such as convolutional neural networks can learn features automatically, but they need much more labeled data and computing power. Hand-crafted features are still useful when data is small, when results must be explained, or when the system must run on simple hardware.
+\textbf{GLCM is the most reused tool.} It appears in batik, road damage, and partly in rice disease. It works for any problem where the surface pattern carries the meaning, and it is cheap to compute.
+
+\textbf{Segmentation before features helps a lot.} In the rice case, taking features only from the sick area instead of the whole leaf gave cleaner features. The same idea applies to palm fruit and road images.
+
+\textbf{Fewer, better features can beat many features.} In the palm oil case, PCA reduced the number of features and still raised accuracy \cite{fadilah}.
+
+Finally, the reported accuracies (77--92\%) show that hand-crafted features are good but not perfect. Deep learning can learn features on its own, but it needs large labeled datasets, which are rare for local topics like Aksara Jawa or regional batik. For these topics, hand-crafted features remain a practical choice.
 
 \begin{table}[t]
 \centering
-\caption{Summary of Cases and Suitable Features}
+\caption{Summary of Cases, Suitable Features, and Reported Results}
 \label{tab:summary}
 \small
-\renewcommand{\arraystretch}{1.2}\setlength{\tabcolsep}{4pt}
-\begin{tabular}{>{\raggedright}p{0.22\columnwidth} >{\raggedright}p{0.29\columnwidth} >{\raggedright\arraybackslash}p{0.33\columnwidth}}
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright}p{0.22\columnwidth} >{\raggedright}p{0.17\columnwidth} >{\raggedright}p{0.32\columnwidth} >{\raggedright\arraybackslash}p{0.19\columnwidth}}
 \toprule
-\textbf{Case} & \textbf{Main Techniques} & \textbf{Suitable Features} \\
+\textbf{Case} & \textbf{Main Feature} & \textbf{Details} & \textbf{Result} \\
 \midrule
-Medical tumor detection & Filtering, Otsu, region growing & Intensity stats, GLCM, circularity \\
-Face recognition & Alignment, histogram equalization & LBP, HOG, landmark distances \\
-Fruit grading & HSV thresholding, morphology & HSV/L*a*b* color, GLCM, size \\
-License plate recognition & Edge detection, connected components & Edge density, aspect ratio, HOG, Hu moments \\
-Low-light CCTV & Gamma, CLAHE, denoising & Histogram mean/std, entropy, noise level \\
-Surface defect detection & Adaptive threshold, FFT & GLCM, LBP, Gabor, Fourier energy \\
+Rice leaf disease \cite{azim} & Color + shape + texture & Hue/saturation segmentation, features from sick area & 86.58\% (XGBoost) \\
+Oil palm ripeness \cite{fadilah} & Color & Color features + PCA & PCA improved accuracy (ANN) \\
+Batik motif \cite{minarno} & Texture & GLCM, 4 stats $\times$ 4 angles & 92.3\% (SVM) \\
+Aksara Jawa \cite{handayani} & Layout & Zoning, 64 features & 77.00\% (ANN) \\
+Road damage \cite{sartika} & Texture & GLCM, 5 stats & 80\% (SVM) \\
+Low-light CCTV \cite{guo} & Histogram stats & Mean, std, entropy; PSNR/SSIM & Quality, not class \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{Conclusion}
-This report summarized six cases that can be solved with digital image processing and identified the features that suit each one. The choice of feature should follow what makes the target different: color for ripeness, texture for tissue and surface defects, shape for plates and characters, local patterns for faces, and histogram statistics for image enhancement. Choosing features based on this idea, and combining a few feature types, leads to simpler and more accurate image processing systems.
+This paper summarized six Indonesian problems that can be solved with digital image processing, across agriculture, cultural heritage, and public infrastructure. For each one, the most suitable feature was the one that follows the real visual difference between classes: color for oil palm ripeness, texture for batik and road damage, a mix of color, shape, and texture for rice disease, stroke layout for Javanese script, and histogram statistics for low-light enhancement. Asking ``what actually changes?'' before choosing features is a simple rule that leads to simpler and more accurate systems.
 
-\begin{thebibliography}{9}
-\footnotesize
+\begin{thebibliography}{00}
 \bibitem{gonzalez} R.~C. Gonzalez and R.~E. Woods, \emph{Digital Image Processing}, 4th~ed. New York, NY, USA: Pearson, 2018.
 \bibitem{haralick} R.~M. Haralick, K.~Shanmugam, and I.~Dinstein, ``Textural features for image classification,'' \emph{IEEE Trans. Syst., Man, Cybern.}, vol.~SMC-3, no.~6, pp.~610--621, Nov. 1973.
-\bibitem{ojala} T.~Ojala, M.~Pietik\"ainen, and T.~M\"aenp\"a\"a, ``Multiresolution gray-scale and rotation invariant texture classification with local binary patterns,'' \emph{IEEE Trans. Pattern Anal. Mach. Intell.}, vol.~24, no.~7, pp.~971--987, Jul. 2002.
-\bibitem{hu} M.-K. Hu, ``Visual pattern recognition by moment invariants,'' \emph{IRE Trans. Inf. Theory}, vol.~8, no.~2, pp.~179--187, Feb. 1962.
-\bibitem{canny} J.~Canny, ``A computational approach to edge detection,'' \emph{IEEE Trans. Pattern Anal. Mach. Intell.}, vol.~PAMI-8, no.~6, pp.~679--698, Nov. 1986.
-\bibitem{dalal} N.~Dalal and B.~Triggs, ``Histograms of oriented gradients for human detection,'' in \emph{Proc. IEEE CVPR}, San Diego, CA, USA, 2005, pp.~886--893.
-\bibitem{otsu} N.~Otsu, ``A threshold selection method from gray-level histograms,'' \emph{IEEE Trans. Syst., Man, Cybern.}, vol.~9, no.~1, pp.~62--66, Jan. 1979.
+\bibitem{azim} M.~A. Azim, M.~K. Islam, M.~M. Rahman, and F.~Jahan, ``An effective feature extraction method for rice leaf disease classification,'' \emph{TELKOMNIKA}, vol.~19, no.~2, pp.~463--470, 2021, doi: 10.12928/telkomnika.v19i2.16488.
+\bibitem{fadilah} N.~Fadilah, J.~Mohamad-Saleh, Z.~Abdul Halim, H.~Ibrahim, and S.~S. Syed Ali, ``Intelligent color vision system for ripeness classification of oil palm fresh fruit bunch,'' \emph{Sensors}, vol.~12, no.~10, pp.~14179--14195, 2012.
+\bibitem{minarno} A.~E. Minarno, F.~D.~S. Sumadi, H.~Wibowo, and Y.~Munarko, ``Classification of batik patterns using K-nearest neighbor and support vector machine,'' \emph{Bull. Elect. Eng. Inform.}, vol.~9, no.~3, pp.~1260--1267, 2020.
+\bibitem{handayani} A.~N. Handayani, H.~W. Herwanto, K.~L. Chandrika, and K.~Arai, ``Recognition of handwritten Javanese script using backpropagation with zoning feature extraction,'' \emph{Knowl. Eng. Data Sci.}, vol.~4, no.~2, pp.~117--127, 2021, doi: 10.17977/um018v4i22021p117-127.
+\bibitem{sartika} Sartika, ``Detection and classification of road damage using camera with GLCM and SVM,'' in \emph{Proc. IEEE Int. Conf. Industry 4.0, Artif. Intell., Commun. Technol. (IAICT)}, 2023, doi: 10.1109/IAICT59002.2023.10205539.
 \bibitem{zuiderveld} K.~Zuiderveld, ``Contrast limited adaptive histogram equalization,'' in \emph{Graphics Gems IV}, P.~S. Heckbert, Ed. San Diego, CA, USA: Academic Press, 1994, pp.~474--485.
+\bibitem{guo} J.~Guo, J.~Ma, \'A.~F. Garc\'ia-Fern\'andez, Y.~Zhang, and H.~Liang, ``A survey on image enhancement for low-light images,'' \emph{Heliyon}, vol.~9, no.~4, Art.~no.~e14558, 2023, doi: 10.1016/j.heliyon.2023.e14558.
 \end{thebibliography}
 
 \end{document}
